@@ -492,28 +492,30 @@ function renderMarketDetail(item) {
     `;
 
   detailPanel.innerHTML = `
-    <div class="detail-cover">
-      ${cover}
-    </div>
-    <div class="detail-body">
-      <div class="detail-kicker">
-        <span>集市</span>
-        <span>更新 ${item.updatedAt}</span>
+    <div class="detail-scroll">
+      <div class="detail-cover">
+        ${cover}
       </div>
-      <h1 class="detail-title">${item.name}</h1>
-      <div class="detail-line">
-        <span>举办地点</span>
-        <strong>${item.place}</strong>
+      <div class="detail-body">
+        <div class="detail-kicker">
+          <span>集市</span>
+          <span>更新 ${item.updatedAt}</span>
+        </div>
+        <h1 class="detail-title">${item.name}</h1>
+        <div class="detail-line">
+          <span>举办地点</span>
+          <strong>${item.place}</strong>
+        </div>
+        <div class="detail-line">
+          <span>举办时间</span>
+          <strong>${item.time}</strong>
+        </div>
+        <div class="detail-line">
+          <span>一句话介绍</span>
+          <p>${item.intro}</p>
+        </div>
+        ${sourceButton}
       </div>
-      <div class="detail-line">
-        <span>举办时间</span>
-        <strong>${item.time}</strong>
-      </div>
-      <div class="detail-line">
-        <span>一句话介绍</span>
-        <p>${item.intro}</p>
-      </div>
-      ${sourceButton}
     </div>
   `;
 }
@@ -533,46 +535,81 @@ function renderCafeDetail(item) {
     `;
 
   detailPanel.innerHTML = `
-    <div class="detail-cover">
-      ${cover}
-    </div>
-    <div class="detail-body">
-      <div class="detail-kicker">
-        <span>咖啡店</span>
+    <div class="detail-scroll">
+      <div class="detail-cover">
+        ${cover}
       </div>
-      <h1 class="detail-title">${item.name}</h1>
-      <div class="score-badge">
-        <span>评分</span>
-        <strong>${item.score}</strong>
-        <span>/ 5.0</span>
+      <div class="detail-body">
+        <div class="detail-kicker">
+          <span>咖啡店</span>
+        </div>
+        <h1 class="detail-title">${item.name}</h1>
+        <div class="score-badge">
+          <span>评分</span>
+          <strong>${item.score}</strong>
+          <span>/ 5.0</span>
+        </div>
+        <div class="detail-line">
+          <span>营业时间</span>
+          <strong>${item.hours}</strong>
+        </div>
+        <div class="detail-line">
+          <span>地址</span>
+          <strong>${item.address}</strong>
+        </div>
+        <div class="detail-line">
+          <span>适合</span>
+          <div class="tag-row">${item.tags.map((tag) => `<span>${tag}</span>`).join("")}</div>
+        </div>
+        ${reviewButton}
       </div>
-      <div class="detail-line">
-        <span>营业时间</span>
-        <strong>${item.hours}</strong>
-      </div>
-      <div class="detail-line">
-        <span>地址</span>
-        <strong>${item.address}</strong>
-      </div>
-      <div class="detail-line">
-        <span>适合</span>
-        <div class="tag-row">${item.tags.map((tag) => `<span>${tag}</span>`).join("")}</div>
-      </div>
-      ${reviewButton}
     </div>
   `;
+}
+
+function detailScrollElement() {
+  return detailPanel.querySelector(".detail-scroll") || detailPanel;
+}
+
+function resetDetailScroll() {
+  const scrollElement = detailScrollElement();
+  detailPanel.scrollTop = 0;
+  scrollElement.scrollTop = 0;
+  if (typeof scrollElement.scrollTo === "function") {
+    scrollElement.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }
+}
+
+function lockDetailAtTop() {
+  detailPanel.classList.add("is-resetting-scroll");
+  resetDetailScroll();
+
+  requestAnimationFrame(() => {
+    resetDetailScroll();
+    window.setTimeout(() => {
+      resetDetailScroll();
+      detailPanel.classList.remove("is-resetting-scroll");
+    }, 120);
+  });
+}
+
+function resetDetailScrollAfterImagesLoad() {
+  detailPanel.querySelectorAll(".detail-cover img").forEach((image) => {
+    if (image.complete) return;
+    image.addEventListener("load", lockDetailAtTop, { once: true });
+  });
 }
 
 function renderDetail(item) {
   if (!item) {
     detailPanel.classList.remove("is-open");
     detailPanel.innerHTML = "";
-    detailPanel.scrollTop = 0;
+    resetDetailScroll();
     return;
   }
 
   detailPanel.classList.add("is-open");
-  detailPanel.scrollTop = 0;
+  lockDetailAtTop();
 
   if (item.category === "markets") {
     renderMarketDetail(item);
@@ -580,9 +617,8 @@ function renderDetail(item) {
     renderCafeDetail(item);
   }
 
-  requestAnimationFrame(() => {
-    detailPanel.scrollTop = 0;
-  });
+  resetDetailScrollAfterImagesLoad();
+  lockDetailAtTop();
 }
 
 function closeDetail() {

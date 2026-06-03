@@ -652,7 +652,7 @@ button {
   width: min(390px, calc(100vw - 36px));
   min-width: 0;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 252, 249, 0.97);
@@ -661,6 +661,21 @@ button {
 
 .detail-panel.is-open {
   display: flex;
+}
+
+.detail-panel.is-resetting-scroll {
+  pointer-events: none;
+}
+
+.detail-scroll {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: auto;
+  overflow-anchor: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .detail-cover {
