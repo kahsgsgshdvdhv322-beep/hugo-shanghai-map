@@ -413,6 +413,12 @@ button {
   padding-bottom: 0;
 }
 
+.has-real-map.is-map-gesturing .amap-marker-wrap {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 80ms ease;
+}
+
 .place-marker {
   position: absolute;
   pointer-events: auto;

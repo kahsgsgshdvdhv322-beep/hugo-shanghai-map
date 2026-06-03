@@ -14,6 +14,7 @@ let searchFitTimer = null;
 let currentCenter = null;
 let suppressMapDismissUntil = 0;
 let isMapZooming = false;
+let mapGestureTimer = null;
 
 const data = window.HUGO_DATA || { markets: [], cafes: [] };
 
@@ -90,8 +91,49 @@ function scheduleRenderMarkers() {
 
 function scheduleRenderMarkersAfterZoom() {
   isMapZooming = false;
+  setMapGestureActive(false);
   window.clearTimeout(renderTimer);
   renderTimer = window.setTimeout(renderMarkers, 140);
+}
+
+function setMapGestureActive(isActive) {
+  const mapStage = document.querySelector(".map-stage");
+  if (!mapStage) return;
+
+  mapStage.classList.toggle("is-map-gesturing", isActive);
+}
+
+function startMapGesture() {
+  isMapZooming = true;
+  setMapGestureActive(true);
+  window.clearTimeout(renderTimer);
+  window.clearTimeout(mapGestureTimer);
+}
+
+function endMapGesture() {
+  window.clearTimeout(mapGestureTimer);
+  mapGestureTimer = window.setTimeout(() => {
+    if (amap) {
+      currentZoom = amap.getZoom();
+      syncMapState();
+    }
+    scheduleRenderMarkersAfterZoom();
+  }, 180);
+}
+
+function bindMobileGestureGuards() {
+  const mapElement = document.querySelector("#amap-map");
+  if (!mapElement) return;
+
+  mapElement.addEventListener(
+    "touchstart",
+    (event) => {
+      if (event.touches && event.touches.length > 1) startMapGesture();
+    },
+    { passive: true }
+  );
+  mapElement.addEventListener("touchend", endMapGesture, { passive: true });
+  mapElement.addEventListener("touchcancel", endMapGesture, { passive: true });
 }
 
 function readLngLat(lnglat) {
@@ -693,17 +735,15 @@ async function initMap() {
     currentZoom = DEFAULT_ZOOM;
 
     document.querySelector(".map-stage").classList.add("has-real-map");
-    amap.on("zoomstart", () => {
-      isMapZooming = true;
-      window.clearTimeout(renderTimer);
-    });
+    bindMobileGestureGuards();
+    amap.on("zoomstart", startMapGesture);
     amap.on("zoomchange", () => {
       currentZoom = amap.getZoom();
     });
     amap.on("zoomend", () => {
       currentZoom = amap.getZoom();
       syncMapState();
-      scheduleRenderMarkersAfterZoom();
+      endMapGesture();
     });
     amap.on("moveend", scheduleRenderMarkers);
     amap.on("resize", scheduleRenderMarkers);
