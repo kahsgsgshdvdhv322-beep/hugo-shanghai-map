@@ -13,6 +13,7 @@ let renderTimer = null;
 let searchFitTimer = null;
 let currentCenter = null;
 let suppressMapDismissUntil = 0;
+let isMapZooming = false;
 
 const data = window.HUGO_DATA || { markets: [], cafes: [] };
 
@@ -81,8 +82,16 @@ function getActiveItems() {
 }
 
 function scheduleRenderMarkers() {
+  if (isMapZooming) return;
+
   window.clearTimeout(renderTimer);
   renderTimer = window.setTimeout(renderMarkers, 80);
+}
+
+function scheduleRenderMarkersAfterZoom() {
+  isMapZooming = false;
+  window.clearTimeout(renderTimer);
+  renderTimer = window.setTimeout(renderMarkers, 140);
 }
 
 function readLngLat(lnglat) {
@@ -683,9 +692,17 @@ async function initMap() {
     currentZoom = DEFAULT_ZOOM;
 
     document.querySelector(".map-stage").classList.add("has-real-map");
+    amap.on("zoomstart", () => {
+      isMapZooming = true;
+      window.clearTimeout(renderTimer);
+    });
     amap.on("zoomchange", () => {
       currentZoom = amap.getZoom();
-      scheduleRenderMarkers();
+    });
+    amap.on("zoomend", () => {
+      currentZoom = amap.getZoom();
+      syncMapState();
+      scheduleRenderMarkersAfterZoom();
     });
     amap.on("moveend", scheduleRenderMarkers);
     amap.on("resize", scheduleRenderMarkers);
