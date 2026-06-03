@@ -567,16 +567,22 @@ function renderDetail(item) {
   if (!item) {
     detailPanel.classList.remove("is-open");
     detailPanel.innerHTML = "";
+    detailPanel.scrollTop = 0;
     return;
   }
 
   detailPanel.classList.add("is-open");
+  detailPanel.scrollTop = 0;
 
   if (item.category === "markets") {
     renderMarketDetail(item);
   } else {
     renderCafeDetail(item);
   }
+
+  requestAnimationFrame(() => {
+    detailPanel.scrollTop = 0;
+  });
 }
 
 function closeDetail() {
