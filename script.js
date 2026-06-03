@@ -12,6 +12,7 @@ let currentZoom = 14.35;
 let renderTimer = null;
 let searchFitTimer = null;
 let currentCenter = null;
+let suppressMapDismissUntil = 0;
 
 const data = window.HUGO_DATA || { markets: [], cafes: [] };
 
@@ -302,7 +303,11 @@ function renderMockMarkers(items) {
     .join("");
 
   markerLayer.querySelectorAll(".place-marker").forEach((marker) => {
-    marker.addEventListener("click", () => selectItem(marker.dataset.id));
+    marker.addEventListener("click", (event) => {
+      event.stopPropagation();
+      suppressMapDismiss();
+      selectItem(marker.dataset.id);
+    });
   });
 }
 
@@ -387,7 +392,11 @@ function renderAmapMarkers(items) {
 
     const markerButton = markerElement.querySelector(".place-marker");
     markerButton.classList.add("amap-place-marker");
-    markerButton.addEventListener("click", () => selectItem(item.id));
+    markerButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      suppressMapDismiss();
+      selectItem(item.id);
+    });
 
     const marker = new window.AMap.Marker({
       anchor: "center",
@@ -526,6 +535,15 @@ function closeDetail() {
   renderMarkers();
 }
 
+function suppressMapDismiss() {
+  suppressMapDismissUntil = Date.now() + 350;
+}
+
+function closeDetailFromMap() {
+  if (Date.now() < suppressMapDismissUntil) return;
+  closeDetail();
+}
+
 function selectItem(id) {
   const item = [...data.markets, ...data.cafes].find((entry) => entry.id === id);
   if (!item) return;
@@ -604,7 +622,7 @@ marketStatusButtons.forEach((button) => {
   });
 });
 
-document.addEventListener("click", (event) => {
+function didClickOutsideDetail(event) {
   if (!activeItemId) return;
 
   const clickedInsideDetail = detailPanel.contains(event.target);
@@ -615,7 +633,10 @@ document.addEventListener("click", (event) => {
   if (clickedInsideDetail || clickedMarker || clickedHeader || clickedFilter) return;
 
   closeDetail();
-});
+}
+
+document.addEventListener("pointerdown", didClickOutsideDetail, true);
+document.addEventListener("click", didClickOutsideDetail);
 
 function loadAmapScript() {
   return new Promise((resolve, reject) => {
@@ -668,6 +689,7 @@ async function initMap() {
     });
     amap.on("moveend", scheduleRenderMarkers);
     amap.on("resize", scheduleRenderMarkers);
+    amap.on("click", closeDetailFromMap);
     renderMarkers();
   } catch {
     document.querySelector(".map-stage").classList.remove("has-real-map");
