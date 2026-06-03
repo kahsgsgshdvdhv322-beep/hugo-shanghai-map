@@ -25,6 +25,7 @@ body {
 body {
   margin: 0;
   overflow: hidden;
+  overscroll-behavior: none;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -53,6 +54,7 @@ button {
   overflow: hidden;
   width: 100%;
   height: 100%;
+  touch-action: none;
   background: var(--map-bg);
 }
 
@@ -61,6 +63,7 @@ button {
   inset: 0;
   z-index: 0;
   display: none;
+  touch-action: none;
 }
 
 .has-real-map .amap-map {
@@ -396,6 +399,20 @@ button {
   pointer-events: none;
 }
 
+.amap-marker-wrap {
+  position: relative;
+  display: flex;
+  width: max-content;
+  justify-content: center;
+  align-items: flex-start;
+  padding-bottom: 11px;
+  pointer-events: none;
+}
+
+.amap-marker-wrap.is-dot-anchor {
+  padding-bottom: 0;
+}
+
 .place-marker {
   position: absolute;
   pointer-events: auto;
@@ -419,7 +436,6 @@ button {
 
 .amap-place-marker {
   position: relative;
-  top: -22px;
   transform: none;
 }
 

@@ -395,9 +395,10 @@ function renderAmapMarkers(items) {
   const dotMarkerIds = getDotMarkerIds(visibleItems);
 
   visibleItems.forEach((item) => {
+    const isDotMarker = dotMarkerIds.has(item.id);
     const markerElement = document.createElement("div");
-    markerElement.className = "amap-marker-wrap";
-    markerElement.innerHTML = buildMarkerHtml(item, "", dotMarkerIds.has(item.id));
+    markerElement.className = `amap-marker-wrap${isDotMarker ? " is-dot-anchor" : ""}`;
+    markerElement.innerHTML = buildMarkerHtml(item, "", isDotMarker);
 
     const markerButton = markerElement.querySelector(".place-marker");
     markerButton.classList.add("amap-place-marker");
@@ -408,7 +409,7 @@ function renderAmapMarkers(items) {
     });
 
     const marker = new window.AMap.Marker({
-      anchor: "center",
+      anchor: isDotMarker ? "center" : "bottom-center",
       content: markerElement,
       position: item.lnglat,
       zIndex: item.id === activeItemId ? 120 : 100,
