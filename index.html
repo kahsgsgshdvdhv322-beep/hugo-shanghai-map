@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>沪go - 上海好去处地图</title>
+    <link rel="stylesheet" href="styles.css?v=27" />
+  </head>
+  <body>
+    <main class="map-app" aria-label="沪go上海好去处地图">
+      <section class="map-stage" aria-label="上海地图">
+        <div id="amap-map" class="amap-map" aria-hidden="true"></div>
+        <div class="mock-map" aria-hidden="true">
+          <span class="road road-a"></span>
+          <span class="road road-b"></span>
+          <span class="road road-c"></span>
+          <span class="road road-d"></span>
+          <span class="river river-a"></span>
+          <span class="river river-b"></span>
+          <span class="park park-a"></span>
+          <span class="park park-b"></span>
+          <span class="park park-c"></span>
+          <span class="block block-a"></span>
+          <span class="block block-b"></span>
+          <span class="block block-c"></span>
+          <span class="block block-d"></span>
+          <span class="map-label label-a">徐汇区</span>
+          <span class="map-label label-b">静安寺</span>
+          <span class="map-label label-c">上生新所</span>
+          <span class="map-label label-d">前滩</span>
+        </div>
+
+        <header class="floating-header">
+          <div class="brand-row">
+            <strong>沪go</strong>
+            <span>上海好去处地图</span>
+          </div>
+
+          <label class="search-box" for="place-search">
+            <span class="search-back" aria-hidden="true">⌕</span>
+            <input id="place-search" type="search" placeholder="搜索附近地点" autocomplete="off" />
+          </label>
+
+          <nav class="category-tabs" aria-label="内容分类">
+            <button class="tab-button" type="button" data-category="markets">集市</button>
+            <button class="tab-button" type="button" data-category="cafes">咖啡</button>
+          </nav>
+        </header>
+
+        <div class="filter-strip" aria-label="快速筛选" hidden>
+          <button class="filter-button" type="button" data-market-status="ongoing">举办中</button>
+          <button class="filter-button" type="button" data-market-status="upcoming">待开始</button>
+        </div>
+
+        <section class="marker-layer" id="marker-layer" aria-label="地图内容点位"></section>
+
+      </section>
+
+      <aside class="detail-panel" id="detail-panel" aria-live="polite"></aside>
+    </main>
+
+    <script src="config.js?v=16"></script>
+    <script src="data.js?v=40"></script>
+    <script src="script.js?v=29"></script>
+  </body>
+</html>
